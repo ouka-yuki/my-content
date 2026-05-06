@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来のナビゲーター | 学部・学科適性診断</title>
+    <meta name="description" content="高校生のための学部・学科適性診断サイト。性格や得意科目からあなたにピッタリの学問分野を見つけよう。各分野の最先端研究も紹介！">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ナビゲーション -->
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <h1 class="logo">EduCompass</h1>
+            <ul class="nav-links">
+                <li><a href="#hero">ホーム</a></li>
+                <li><a href="#diagnostic">適性診断</a></li>
+                <li><a href="#research">最先端研究</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ヒーローセクション -->
+        <section id="hero" class="hero fade-in">
+            <div class="hero-content glass-panel">
+                <h2 class="hero-title">あなたの「好き」が<br><span class="gradient-text">未来を創る</span></h2>
+                <p class="hero-subtitle">性格と興味から、あなたに最適な大学の学部・学科を診断します。</p>
+                <a href="#diagnostic" class="btn btn-primary pulse-effect">診断を始める</a>
+            </div>
+            <!-- 装飾用オーブ -->
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+        </section>
+
+        <!-- 診断セクション -->
+        <section id="diagnostic" class="diagnostic section">
+            <div class="container fade-in">
+                <h2 class="section-title">学部・学科 適性診断</h2>
+                <p class="section-desc">直感で選んでください。あなたの中に眠る可能性を見つけ出します。</p>
+                
+                <form id="quiz-form" class="quiz-container glass-panel">
+                    <!-- Q1 -->
+                    <div class="question-block active" id="q1">
+                        <h3>Q1. もしあなたが新しいボードゲームの遊び方を覚えるとしたら？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q1" value="abstract"> 説明書を最初からしっかり読み込み、ルールや必勝法のロジックを理解してから始めたい</label>
+                            <label class="option-label"><input type="radio" name="q1" value="concrete"> とりあえず見切り発車でプレイを開始し、実際の動きや盤面を見ながら感覚を掴みたい</label>
+                        </div>
+                    </div>
+
+                    <!-- Q2 (追加：認知特性2) -->
+                    <div class="question-block" id="q2">
+                        <h3>Q2. あなたがより「面白い！」とワクワクするテレビ番組や動画は？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q2" value="systematic"> 歴史の謎、宇宙のしくみ、または事件のトリックを論理的に解明するような内容</label>
+                            <label class="option-label"><input type="radio" name="q2" value="humanistic"> 人間関係のドラマや、誰かのリアルな人生・感情に焦点を当てたドキュメンタリー</label>
+                        </div>
+                    </div>
+
+                    <!-- Q3 (動機) -->
+                    <div class="question-block" id="q3">
+                        <h3>Q3. 趣味で何か作品を作ってSNSに投稿しました。一番嬉しい瞬間は？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q3" value="intrinsic"> 「自分でも納得のいく最高の出来栄えだ！」と、作品そのものの完成度に満足したとき</label>
+                            <label class="option-label"><input type="radio" name="q3" value="extrinsic"> 「たくさんの人から『いいね』や賞賛のコメントをもらえた！」と、評価を実感したとき</label>
+                        </div>
+                    </div>
+
+                    <!-- Q4 (開放性) -->
+                    <div class="question-block" id="q4">
+                        <h3>Q4. 休日の予定が急になくなり、一日ポッカリと暇になりました。どうする？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q4" value="high_open"> 全く行ったことのない街へ出かけたり、普段なら絶対見ないジャンルの映画を観てみる</label>
+                            <label class="option-label"><input type="radio" name="q4" value="low_open"> いつものお気に入りのお店に行ったり、読みかけだった本を読んだりして過ごす</label>
+                        </div>
+                    </div>
+
+                    <!-- Q5 (誠実性) -->
+                    <div class="question-block" id="q5">
+                        <h3>Q5. 夏休みの宿題や、長期間のプロジェクトを進めるときのあなたのパターンは？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q5" value="high_consc"> 逆算してスケジュールを立て、毎日決まった量を淡々とこなしていく</label>
+                            <label class="option-label"><input type="radio" name="q5" value="low_consc"> 気分が乗ったときに一気に進める。ギリギリにならないと火がつかないこともある</label>
+                        </div>
+                    </div>
+
+                    <!-- Q6 (外向性) -->
+                    <div class="question-block" id="q6">
+                        <h3>Q6. 複雑な問題に直面し、とても疲れてしまったとき、どうやってリフレッシュする？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q6" value="high_extra"> 友達に会って話を聞いてもらったり、誰かと一緒にワイワイ過ごしてエネルギーをもらう</label>
+                            <label class="option-label"><input type="radio" name="q6" value="introverted"> 一人の時間を確保して、ゆっくり考え事をしたり、静かな空間で自分と向き合う</label>
+                        </div>
+                    </div>
+
+                    <!-- Q7 (RIASEC 1) -->
+                    <div class="question-block" id="q7">
+                        <h3>Q7. 将来、どのような環境で働くのが理想ですか？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q7" value="R"> 【現場型】外に出たり、機械や自然に触れながら体を動かして働く</label>
+                            <label class="option-label"><input type="radio" name="q7" value="I"> 【研究型】静かなラボやデスクで、データや実験結果とじっくり向き合う</label>
+                            <label class="option-label"><input type="radio" name="q7" value="A"> 【自由型】制約のない自由な空間で、自分の感性やアイデアを形にする</label>
+                            <label class="option-label"><input type="radio" name="q7" value="S"> 【交流型】学校や病院など、多くの人と直接関わりながらサポートする</label>
+                            <label class="option-label"><input type="radio" name="q7" value="E"> 【競争型】ビジネスの最前線で、チームを引っ張ったり企画を成功させる</label>
+                            <label class="option-label"><input type="radio" name="q7" value="C"> 【堅実型】整理整頓された環境で、決められたルールや手順を正確にこなす</label>
+                        </div>
+                    </div>
+
+                    <!-- Q8 (RIASEC 2) -->
+                    <div class="question-block" id="q8">
+                        <h3>Q8. 余暇の過ごし方として、どれが一番好きですか？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q8" value="R"> DIYやスポーツ、アウトドアなど体を動かす実践的な趣味</label>
+                            <label class="option-label"><input type="radio" name="q8" value="I"> 読書やパズル、プログラミングなど頭を深く使う趣味</label>
+                            <label class="option-label"><input type="radio" name="q8" value="A"> 映画鑑賞や絵を描くこと、音楽など芸術的な趣味</label>
+                            <label class="option-label"><input type="radio" name="q8" value="S"> 友達とのおしゃべりやボランティア活動など、人と関わる趣味</label>
+                            <label class="option-label"><input type="radio" name="q8" value="E"> イベントの企画やSNSでの発信、ビジネス書の読書など</label>
+                            <label class="option-label"><input type="radio" name="q8" value="C"> コレクションの整理や家計簿、スケジュール管理など</label>
+                        </div>
+                    </div>
+
+                    <!-- Q9 (RIASEC 3) -->
+                    <div class="question-block" id="q9">
+                        <h3>Q9. 文化祭（または大きなイベント）でクラスの出し物をします。あなたが担当したい役割は？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q9" value="R"> 【設営】実際に木材を切ったり、ペンキを塗ってセットを組み立てる</label>
+                            <label class="option-label"><input type="radio" name="q9" value="I"> 【リサーチ】アンケートを分析したり、どんな内容にすれば成功するかデータで調べる</label>
+                            <label class="option-label"><input type="radio" name="q9" value="A"> 【デザイン】ポスターを描いたり、劇のシナリオや衣装をクリエイティブに考える</label>
+                            <label class="option-label"><input type="radio" name="q9" value="S"> 【サポート】当日の案内係や、困っている人のフォロー、裏方でみんなを助ける</label>
+                            <label class="option-label"><input type="radio" name="q9" value="E"> 【リーダー】責任者として全体をまとめ上げたり、外部に宣伝して人を集める</label>
+                            <label class="option-label"><input type="radio" name="q9" value="C"> 【会計】予算をきっちり計算したり、タイムテーブルを正確に管理する</label>
+                        </div>
+                    </div>
+
+                    <!-- Q10 (制約の有無) -->
+                    <div class="question-block" id="q10">
+                        <h3>Q10. 【任意の質問】現実的な制約（経済状況、学力、勉強時間など）を診断に含めますか？</h3>
+                        <p style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-secondary);">※進路心理・キャリア理論に基づき、より現実的な提案を行います。</p>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q10" value="yes"> はい（現実的な条件も踏まえて考えたい）</label>
+                            <label class="option-label"><input type="radio" name="q10" value="no"> いいえ（純粋な興味や適性だけで考えたい）</label>
+                        </div>
+                    </div>
+
+                    <!-- Q11 (制約の詳細) -->
+                    <div class="question-block" id="q11">
+                        <h3>Q11. 進学にあたり、あなたの現実的な希望に近いものは？</h3>
+                        <div class="options">
+                            <label class="option-label"><input type="radio" name="q11" value="high_invest"> 長期間の勉強や高い学費がかかっても、高度な専門職（医師・研究者など）を目指したい</label>
+                            <label class="option-label"><input type="radio" name="q11" value="practical"> 4年間でしっかり学び、就職活動に有利な実践的なスキルを身につけたい</label>
+                            <label class="option-label"><input type="radio" name="q11" value="economic"> 自分のペースで学びたい、または費用を抑えながら興味を深めたい</label>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button type="button" id="prev-btn" class="btn btn-secondary" style="display:none;">戻る</button>
+                        <button type="button" id="next-btn" class="btn btn-primary">次へ</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary" style="display:none;">診断結果を見る</button>
+                    </div>
+                </form>
+
+                <!-- 結果表示エリア -->
+                <div id="result-area" class="result-area glass-panel hidden">
+                    <h3 style="font-size: 2rem; margin-bottom: 1rem;">あなたの適性ランキング TOP3</h3>
+                    
+                    <div class="result-section">
+                        <h5>💡 なぜこれらの分野が合っているの？（総合的な理由）</h5>
+                        <p id="result-reason" class="result-desc"></p>
+                    </div>
+
+                    <div id="ranking-container">
+                        <!-- JSでランキングごとのブロックを追加 -->
+                    </div>
+
+                    <button id="retry-btn" class="btn btn-secondary mt-2">もう一度診断する</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 研究紹介セクション -->
+        <section id="research" class="research section">
+            <div class="container fade-in">
+                <h2 class="section-title">世界を変える魅惑の研究</h2>
+                <p class="section-desc">大学では、想像を超える面白い研究が行われています。</p>
+
+                <div class="grid-cards">
+                    <!-- Card 1 -->
+                    <div class="research-card glass-panel interactive">
+                        <div class="card-icon">🧠</div>
+                        <h3>ブレイン・マシン・インターフェース</h3>
+                        <span class="badge">情報工学 / 神経科学</span>
+                        <p>考えるだけで機械を動かす技術。障害を持つ方の支援や、全く新しいコミュニケーションの形として注目されています。</p>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="research-card glass-panel interactive">
+                        <div class="card-icon">🧬</div>
+                        <h3>合成生物学・ゲノム編集</h3>
+                        <span class="badge">生命科学 / 農学</span>
+                        <p>生命の設計図を書き換え、プラスチックを分解するバクテリアや、過酷な環境で育つ作物を生み出します。</p>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="research-card glass-panel interactive">
+                        <div class="card-icon">🌌</div>
+                        <h3>宇宙人類学</h3>
+                        <span class="badge">社会学 / 人類学</span>
+                        <p>もし人類が火星に移住したら、どんな文化や社会が生まれるのか？宇宙という極限環境における人間の営みを研究します。</p>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="research-card glass-panel interactive">
+                        <div class="card-icon">🎭</div>
+                        <h3>行動経済学とナッジ</h3>
+                        <span class="badge">経済学 / 心理学</span>
+                        <p>人間はなぜ非合理な選択をするのか？心理学を用いて経済行動を分析し、より良い社会の仕組みをデザインします。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer glass">
+        <p>&copy; 2026 EduCompass. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
