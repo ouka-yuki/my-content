@@ -274,6 +274,18 @@ body::after {
     gap: 1rem;
 }
 
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .option-label {
     display: block;
     padding: 1rem 1.5rem;

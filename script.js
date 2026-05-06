@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
         
-        // Q10 (index 9) で「いいえ」を選んでいる場合、次へボタンを非表示にして結果を見るボタンにする
-        const isQ10No = currentQuestion === 9 && document.querySelector('input[name="q10"]:checked')?.value === 'no';
+        // Q10 (現在のindex 8) で「いいえ」を選んでいる場合、次へボタンを非表示にして結果を見るボタンにする
+        const isQ10No = currentQuestion === 8 && document.querySelector('input[name="q10"]:checked')?.value === 'no';
 
         if (currentQuestion === questions.length - 1 || isQ10No) {
             nextBtn.style.display = 'none';
@@ -40,13 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    form.addEventListener('change', () => {
+    form.addEventListener('change', (e) => {
+        if (e.target.name === 'q8') {
+            const checkedBoxes = document.querySelectorAll('input[name="q8"]:checked');
+            if (checkedBoxes.length > 3) {
+                e.target.checked = false;
+                alert('選択できるのは最大3つまでです。');
+            }
+        }
         updateControls();
     });
 
     nextBtn.addEventListener('click', () => {
         // 現在の質問が選択されているか確認
-        const currentInputs = questions[currentQuestion].querySelectorAll('input[type="radio"]');
+        const currentInputs = questions[currentQuestion].querySelectorAll('input[type="radio"], input[type="checkbox"]');
         let answered = false;
         currentInputs.forEach(input => {
             if (input.checked) answered = true;
@@ -81,18 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const q5 = formData.get('q5');
         const q6 = formData.get('q6');
         const q7 = formData.get('q7');
-        const q8 = formData.get('q8');
-        const q9 = formData.get('q9');
+        const q8 = formData.getAll('q8');
         const q10 = formData.get('q10');
         const q11 = formData.get('q11');
 
         // Q10が'yes'の場合はQ11の回答も必須
-        if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || !q8 || !q9 || !q10 || (q10 === 'yes' && !q11)) {
+        if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || q8.length === 0 || !q10 || (q10 === 'yes' && !q11)) {
             alert('すべての質問に答えてください。');
             return;
         }
 
-        calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11);
+        calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q10, q11);
     });
 
     retryBtn.addEventListener('click', () => {
@@ -103,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.style.display = 'block';
     });
 
-    function calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11) {
+    function calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q10, q11) {
         let scores = {
             sci_math: 0,
             engineering: 0,
@@ -170,10 +176,28 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (val === 'C') { scores.business += 2; scores.info_data += 1; scores.engineering += 1; }
         }
 
-        // Q7, Q8, Q9: RIASEC
+        // Q7: RIASEC (残す)
         processRIASEC(q7);
-        processRIASEC(q8);
-        processRIASEC(q9);
+
+        // Q8: テーマ複数選択 (最大3つ)
+        q8.forEach(val => {
+            if (val === 'sci1') { scores.sci_math += 3; }
+            else if (val === 'sci2') { scores.sci_math += 2; scores.info_data += 2; }
+            else if (val === 'sci3') { scores.info_data += 3; scores.engineering += 1; }
+            else if (val === 'sci4') { scores.engineering += 3; }
+            else if (val === 'sci5') { scores.engineering += 2; scores.agri_bio += 1; scores.sci_math += 1; }
+            else if (val === 'sci6') { scores.agri_bio += 3; scores.medical += 1; }
+            else if (val === 'sci7') { scores.agri_bio += 2; scores.sci_math += 1; }
+            else if (val === 'sci8') { scores.medical += 3; scores.sports_health += 1; }
+            else if (val === 'hum1') { scores.education += 2; scores.humanities += 1; scores.medical += 1; }
+            else if (val === 'hum2') { scores.humanities += 3; }
+            else if (val === 'hum3') { scores.humanities += 1; scores.intl_lang += 3; }
+            else if (val === 'hum4') { scores.arts_create += 3; }
+            else if (val === 'hum5') { scores.business += 3; }
+            else if (val === 'hum6') { scores.business += 2; scores.intl_lang += 1; }
+            else if (val === 'hum7') { scores.education += 3; }
+            else if (val === 'hum8') { scores.sports_health += 3; }
+        });
 
         // Q10 & Q11: 現実的制約
         if (q10 === 'yes' && q11) {
@@ -192,11 +216,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(entry => entry[0]);
 
         let top3 = sortedCategories.slice(0, 3);
-        displayResult(top3);
+        displayResult(top3, { q3, q4, q5, q6, q7 });
     }
 
-    function displayResult(top3Categories) {
+    function displayResult(top3Categories, traits) {
         const reasonEl = document.getElementById('result-reason');
+        const workStyleEl = document.getElementById('work-style-desc');
         const rankingContainer = document.getElementById('ranking-container');
 
         const reasons = {
@@ -317,6 +342,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1位のカテゴリーをベースに総合的な理由を表示
         reasonEl.textContent = reasons[top3Categories[0]];
+
+        // 働き方のテキストを生成
+        if (workStyleEl && traits) {
+            let wsText = "<strong>【あなたの行動原理】</strong><br>";
+            
+            if (traits.q3 === 'intrinsic') {
+                wsText += "あなたは「自分自身の納得感や内なる好奇心」を原動力（内発的動機）として行動するタイプです。";
+            } else {
+                wsText += "あなたは「他者からの評価や社会への影響力」をモチベーション（外発的動機）として頑張れるタイプです。";
+            }
+
+            if (traits.q6 === 'high_extra') {
+                wsText += "また、人と関わりながらワイワイと進めることでエネルギーを得るため、";
+            } else {
+                wsText += "また、一人の時間を大切にし、深く思考することでエネルギーを得るため、";
+            }
+
+            if (traits.q4 === 'high_open') {
+                wsText += "変化の多い環境や新しいことへの挑戦を好みます。<br><br>";
+            } else {
+                wsText += "決まったルーティンや安定した環境の中で着実に物事を進めるのを好みます。<br><br>";
+            }
+
+            wsText += "<strong>【向いている仕事・環境】</strong><br>";
+            if (traits.q6 === 'introverted' && traits.q3 === 'intrinsic') {
+                wsText += "一人で黙々と深く探求できる「研究職」や「専門職（エンジニア・クリエイターなど）」が非常に向いています。自分のペースで納得いくまでクオリティを高められる環境で最大のパフォーマンスを発揮します。";
+            } else if (traits.q6 === 'high_extra' && traits.q3 === 'extrinsic') {
+                wsText += "チームを引っ張ったり、多くの人と関わりながら成果を上げる「企画職」「営業職」「マネジメント職」などに適性があります。他者からの感謝や目に見える評価がダイレクトに返ってくる環境で輝きます。";
+            } else if (traits.q6 === 'high_extra' && traits.q3 === 'intrinsic') {
+                wsText += "人と関わることは好きですが、評価よりも「相手の役に立ったか」「良いものを作れたか」を重視します。「教育関連」「医療・福祉」「対人サポート職」など、他者の成長やケアに直接関わる仕事に向いています。";
+            } else if (traits.q6 === 'introverted' && traits.q3 === 'extrinsic') {
+                wsText += "一人で集中して作業しつつも、その結果が社会にどう影響を与えるかを重視します。「データアナリスト」「財務・会計」「Webマーケティング」など、専門スキルを用いて組織や社会に確かな貢献をする仕事が合っています。";
+            }
+
+            if (traits.q5 === 'high_consc') {
+                wsText += " 計画的にコツコツと努力できるため、長期的なプロジェクトや正確性が求められる業務でも高く信頼されます。";
+            } else {
+                wsText += " 柔軟性が高く、型にはまらない発想ができるため、ゼロからイチを生み出すような業務で力を発揮します。";
+            }
+            
+            workStyleEl.innerHTML = wsText;
+        }
 
         rankingContainer.innerHTML = '';
 
