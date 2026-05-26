@@ -21,9 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentQuestion = 0;
 
-    function updateControls() {
+    function updateControls(direction = 'next') {
         questions.forEach((q, index) => {
-            q.classList.toggle('active', index === currentQuestion);
+            const isActive = index === currentQuestion;
+            q.classList.toggle('active', isActive);
+            if (isActive) {
+                q.classList.remove('slide-right', 'slide-left');
+                if (direction === 'next') {
+                    void q.offsetWidth; // リフローを起こしてアニメーションをリセット
+                    q.classList.add('slide-right');
+                } else if (direction === 'prev') {
+                    void q.offsetWidth;
+                    q.classList.add('slide-left');
+                }
+            }
         });
 
         prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
@@ -38,6 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
             nextBtn.style.display = 'inline-block';
             submitBtn.style.display = 'none';
         }
+
+        // プログレスバーの更新
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        if (progressBar && progressText) {
+            const isQ10NoCheck = document.querySelector('input[name="q10"]:checked')?.value === 'no';
+            const totalQuestions = isQ10NoCheck ? 9 : 10;
+            const currentStep = Math.min(currentQuestion + 1, totalQuestions);
+            const percentage = (currentStep / totalQuestions) * 100;
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = `質問 ${currentStep} / ${totalQuestions}`;
+        }
     }
 
     form.addEventListener('change', (e) => {
@@ -48,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('選択できるのは最大3つまでです。');
             }
         }
-        updateControls();
+        updateControls('none');
     });
 
     nextBtn.addEventListener('click', () => {
@@ -66,14 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentQuestion < questions.length - 1) {
             currentQuestion++;
-            updateControls();
+            updateControls('next');
         }
     });
 
     prevBtn.addEventListener('click', () => {
         if (currentQuestion > 0) {
             currentQuestion--;
-            updateControls();
+            updateControls('prev');
         }
     });
 
@@ -104,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     retryBtn.addEventListener('click', () => {
         form.reset();
         currentQuestion = 0;
-        updateControls();
+        updateControls('next');
         resultArea.classList.add('hidden');
         form.style.display = 'block';
     });
@@ -216,13 +239,77 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(entry => entry[0]);
 
         let top3 = sortedCategories.slice(0, 3);
-        displayResult(top3, { q3, q4, q5, q6, q7 });
+        displayResult(top3, { q1, q2, q3, q4, q5, q6, q7, q10, q11 });
     }
 
     function displayResult(top3Categories, traits) {
         const reasonEl = document.getElementById('result-reason');
         const workStyleEl = document.getElementById('work-style-desc');
         const rankingContainer = document.getElementById('ranking-container');
+
+        // 性格・行動原理のスコア計算
+        const q1 = traits.q1;
+        const q3 = traits.q3;
+        const q4 = traits.q4;
+        const q5 = traits.q5;
+        const q6 = traits.q6;
+        const q7 = traits.q7;
+        const q10 = traits.q10;
+
+        // 1. 外向 vs 内向
+        let extra = 50;
+        if (q6 === 'high_extra') extra += 25; else extra -= 25;
+        if (q7 === 'S' || q7 === 'E') extra += 15;
+        if (q7 === 'I') extra -= 15;
+        if (q3 === 'extrinsic') extra += 10; else extra -= 10;
+        extra = Math.max(5, Math.min(95, extra));
+        const intro = 100 - extra;
+
+        // 2. 自発 vs 外的要因
+        let intrinsic = 50;
+        if (q3 === 'intrinsic') intrinsic += 25; else intrinsic -= 25;
+        if (q1 === 'abstract') intrinsic += 10;
+        if (q4 === 'high_open') intrinsic += 10;
+        if (q10 === 'no') intrinsic += 15;
+        intrinsic = Math.max(5, Math.min(95, intrinsic));
+        const extrinsic = 100 - intrinsic;
+
+        // 3. 開放 vs 堅実
+        let openVal = 50;
+        if (q4 === 'high_open') openVal += 30; else openVal -= 30;
+        if (q7 === 'A') openVal += 15;
+        if (q5 === 'low_consc') openVal += 10;
+        openVal = Math.max(5, Math.min(95, openVal));
+        const stable = 100 - openVal;
+
+        // 4. 計画 vs 柔軟
+        let consc = 50;
+        if (q5 === 'high_consc') consc += 30; else consc -= 30;
+        if (q1 === 'abstract') consc += 10;
+        if (q7 === 'C') consc += 15;
+        consc = Math.max(5, Math.min(95, consc));
+        const flex = 100 - consc;
+
+        // DOMの更新
+        document.getElementById('bar-extraversion').style.width = extra + '%';
+        document.getElementById('bar-introversion').style.width = intro + '%';
+        document.getElementById('val-extraversion').textContent = extra + '%';
+        document.getElementById('val-introversion').textContent = intro + '%';
+
+        document.getElementById('bar-intrinsic').style.width = intrinsic + '%';
+        document.getElementById('bar-extrinsic').style.width = extrinsic + '%';
+        document.getElementById('val-intrinsic').textContent = intrinsic + '%';
+        document.getElementById('val-extrinsic').textContent = extrinsic + '%';
+
+        document.getElementById('bar-openness').style.width = openVal + '%';
+        document.getElementById('bar-stability').style.width = stable + '%';
+        document.getElementById('val-openness').textContent = openVal + '%';
+        document.getElementById('val-stability').textContent = stable + '%';
+
+        document.getElementById('bar-conscientious').style.width = consc + '%';
+        document.getElementById('bar-flexibility').style.width = flex + '%';
+        document.getElementById('val-conscientious').textContent = consc + '%';
+        document.getElementById('val-flexibility').textContent = flex + '%';
 
         const reasons = {
             sci_math: 'あなたは「抽象的な思考」が得意で、純粋な「知的好奇心」が強いタイプです。目に見えない現象の裏にある法則を解き明かしたり、深く考え込む研究者としての適性があるため、論理的な探求が求められる分野がぴったりです。',
@@ -244,8 +331,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 learn: '宇宙の始まり、素粒子の振る舞い、数学的な証明など、自然界や世界の「なぜ？」を根本から解き明かす学問です。',
                 jobs: '大学の研究者、データサイエンティスト、システムエンジニア、中高の理科・数学教員など。',
                 articles: [
-                    { title: 'スマホはどうやって動いているの？', desc: '実はスマホの中には「量子力学」という、目に見えないミクロな世界の不思議な法則が詰まっています。' },
-                    { title: 'ブラックホールの向こう側はどうなっている？', desc: '光さえも吸い込むブラックホール。宇宙物理学や数学を使って、その謎に迫ることができます。' }
+                    { title: 'スマホの裏にあるミクロの物理法則', desc: 'スマホを動かす半導体には「量子力学」というミクロな世界の物理法則が使われています。理論物理では極めて難解な数式を操る必要があり、「数式が嫌いだけど物理の不思議さに惹かれる」という人は、数式だらけの講義に圧倒されるギャップがあります。' },
+                    { title: 'ブラックホールの謎に迫る計算', desc: '光すら吸い込むブラックホールは、アインシュタインの相対性理論などを駆使して解明します。実験はなく、ひたすら紙とペン、コンピュータで数式を追うため、地道に机に向かう抽象的な作業が苦手な人には退屈に感じるかもしれません。' },
+                    { title: '大学の数学は「論理の証明」', desc: '大学数学は高校までの「計算ゲーム」とは全く異なり、概念を厳密に証明する「哲学」に近いです。「高校での暗記や計算が得意だったから」という理由だけで入ると、抽象的な数理論理の議論に戸惑うミスマッチが起きやすいです。' },
+                    { title: '地道で泥臭い実験物理の世界', desc: 'ノーベル賞級の発見を支える実験物理は、巨大な装置を手作りしたり、数ヶ月に及ぶ測定エラーと戦うなど極めて泥臭いです。スマートな頭脳戦だけを期待すると現実の泥臭さに挫折しがちですが、未知の現象を世界で最初に目撃する感動があります。' }
                 ]
             },
             engineering: {
@@ -253,8 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 learn: 'ロボットの制御、安全で美しい建築物の設計、新しい素材の開発など、科学の知識を応用して「モノ」を作る方法を学びます。',
                 jobs: 'メーカーの製品開発職、建築士、プラントエンジニアなど。',
                 articles: [
-                    { title: '絶対に壊れない橋はどう作る？', desc: '物理の力学と最新の素材計算を使って、台風や地震でもびくともしない構造を設計する秘密に迫ります。' },
-                    { title: 'ロボットは人間を超えられる？', desc: 'しなやかな動きや繊細な力加減を実現する、最先端の機械工学の仕組みを紹介します。' }
+                    { title: '絶対に壊れない橋の設計', desc: '力学と最新の素材を用いて安全な構造を設計します。華やかなデザインだけでなく、ひたすら建築基準法の読解や地道な構造計算、強度試験を行うため、数学や物理の計算・地味な安全評価業務を避けたい人には辛い分野です。' },
+                    { title: 'ロボット制御の裏に潜む数学', desc: 'ロボットの滑らかな動きを作るには、線形代数や微分積分などの数学をプログラムに落とし込みます。「ロボットが好きで触りたい」だけでは、裏側の複雑な数式とプログラミングの壁にぶつかり、実機に触る前に挫折することもあります。' },
+                    { title: '新素材開発における実験の日々', desc: '軽くて強い炭素繊維などの新素材開発は、地道な化学合成と失敗の繰り返しです。すぐにかっこいい製品ができるわけではなく、何百回もの単調な実験を安全に重ねる根気がないと、日々の実験生活が痛手になります。' },
+                    { title: 'デザインと法律の狭間にある建築', desc: '建築は芸術的な美しさだけでなく、防災基準や都市計画法など「法律と予算」の厳しい制約の中で行われます。自由奔放なアートを描くだけの学問ではなく、泥臭い交渉やルール遵守が求められるギャップがあります。' }
                 ]
             },
             info_data: {
@@ -262,8 +353,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 learn: 'AIのアルゴリズム、プログラミング、膨大なデータから社会のトレンドを読み解く統計解析の手法などを学びます。',
                 jobs: 'ITエンジニア、データアナリスト、AI開発者、Webデザイナーなど。',
                 articles: [
-                    { title: '自動運転車はなぜぶつからない？', desc: 'カメラやセンサーから得た膨大な情報をAIが一瞬で計算し、安全なルートを判断する仕組みを学びます。' },
-                    { title: 'あなたへのおすすめ動画はどう決まる？', desc: 'YouTubeやTikTokの裏側で動いている、あなたの好みを予測するレコメンドエンジンの秘密。' }
+                    { title: '自動運転を支える統計と計算', desc: 'AIが安全ルートを瞬時に判断する自動運転。その裏側は膨大な確率・統計の計算です。「パソコン操作やガジェットが好き」というだけで入ると、数学理論の壁に圧倒されてしまう最大のギャップが存在します。' },
+                    { title: 'あなたへのおすすめ動画の秘密', desc: 'レコメンドエンジンは、行動履歴を高度な数理モデルで分析して好みを予測します。単にアルゴリズムを書くだけでなく、個人情報保護などの倫理的課題も伴うため、数理だけでなく社会科学的な視野も必要になります。' },
+                    { title: 'プログラミングは「手段」であって「目的」ではない', desc: '大学の情報学は、コーディング技術ではなく「情報とは何か」という数理的理論を学びます。単に「Webサイトを作りたい、コードを書きたい」だけなら専門学校の方が向いており、大学の難解な論理学の授業に面食らう人も多いです。' },
+                    { title: '暗号技術とハッカーの知恵比べ', desc: '情報を守る暗号技術は、素数をベースにした高度な数論に裏打ちされています。映画のような華やかなハッキングのイメージとは異なり、数論やプロトコル規約を徹底的に読み込む几帳面さと数学への深い理解が不可欠です。' }
                 ]
             },
             agri_bio: {
@@ -271,8 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 learn: '動植物の生態、遺伝子操作による品種改良、環境問題の解決策など、生命と自然に関する科学を学びます。',
                 jobs: '食品メーカーの開発職、農業技術者、環境コンサルタント、バイオ研究者など。',
                 articles: [
-                    { title: '枯れないトマトはどう作る？', desc: '遺伝子を少し書き換えるだけで、病気に強くて美味しい野菜を生み出すゲノム編集技術の凄さ。' },
-                    { title: '微生物がプラスチックを食べる？', desc: '地球環境を救うかもしれない、不思議な微生物の力を利用した最新のバイオテクノロジー。' }
+                    { title: 'ゲノム編集による未来の作物', desc: '遺伝子を書き換えて病気に強い野菜を作ります。しかし、バイオテクノロジーは数ヶ月かけて細胞を育てる地道な作業であり、雑菌混入（コンタミ）で一瞬にして実験が台無しになるため、非常に繊細で諦めないメンタルが必要です。' },
+                    { title: '微生物の力を借りた環境浄化', desc: '地球を救う微生物の力を探求します。バイオ実験は非常に泥臭く、生き物を相手にするため「週末も培養器の様子を見に研究室に行かなければならない」など、私生活の拘束が非常に厳しいという現実的ギャップがあります。' },
+                    { title: '生態系調査フィールドワークの現実', desc: '生態系や森林を学ぶため森や川に入ります。大自然との触れ合いは魅力的ですが、虫や泥、悪天候、肉体労働に耐えるタフさが必要です。「ただ自然を見るのが好き」という観光気分では乗り切れません。' },
+                    { title: '「農学」はスマート農業やバイオの科学', desc: '現代の農学はバイオやスマート農業、流通経済まで多岐にわたるサイエンスです。クワを持って土を耕すイメージで入ると、高度な分子生物学や有機化学の講義だらけで驚くかもしれません。' }
                 ]
             },
             medical: {
@@ -420,10 +515,17 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingContainer.appendChild(rankBlock);
         });
 
+        // ローディング表示処理
+        const loader = document.getElementById('loader');
         form.style.display = 'none';
-        resultArea.classList.remove('hidden');
-        
-        // 結果エリアへスクロール
-        resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        loader.classList.remove('hidden');
+        loader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            // 結果エリアへスクロール
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 1800);
     }
 });

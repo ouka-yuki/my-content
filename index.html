@@ -41,6 +41,14 @@
                 <p class="section-desc">直感で選んでください。あなたの中に眠る可能性を見つけ出します。</p>
                 
                 <form id="quiz-form" class="quiz-container glass-panel">
+                    <!-- プログレスバー -->
+                    <div class="progress-container">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progress-bar"></div>
+                        </div>
+                        <span class="progress-text" id="progress-text">質問 1 / 10</span>
+                    </div>
+
                     <!-- Q1 -->
                     <div class="question-block active" id="q1">
                         <h3>Q1. もしあなたが新しいボードゲームの遊び方を覚えるとしたら？</h3>
@@ -158,6 +166,14 @@
                     </div>
                 </form>
 
+                <!-- ローディングエリア -->
+                <div id="loader" class="loader-overlay glass-panel hidden">
+                    <div class="loader-content">
+                        <div class="spinner"></div>
+                        <p class="loader-text">あなたの回答から適性を分析中...</p>
+                    </div>
+                </div>
+
                 <!-- 結果表示エリア -->
                 <div id="result-area" class="result-area glass-panel hidden">
                     <h3 style="font-size: 2rem; margin-bottom: 1rem;">あなたの適性ランキング TOP3</h3>
@@ -166,6 +182,76 @@
                     <div class="result-section" id="work-style-section">
                         <h5>🧑‍💼 あなたの行動原理と向いている働き方</h5>
                         <p id="work-style-desc" class="result-desc"></p>
+                    </div>
+
+                    <!-- 新設：性格・行動原理スコアの可視化セクション -->
+                    <div class="result-section" id="personality-score-section">
+                        <h5>📊 あなたの性格・行動原理分析</h5>
+                        <div class="personality-bars">
+                            <!-- 外向 vs 内向 -->
+                            <div class="personality-bar-container">
+                                <div class="personality-labels">
+                                    <span>外向型</span>
+                                    <span>内向型</span>
+                                </div>
+                                <div class="personality-bar-track">
+                                    <div id="bar-extraversion" class="personality-bar-fill-left" style="width: 50%;"></div>
+                                    <div id="bar-introversion" class="personality-bar-fill-right" style="width: 50%;"></div>
+                                </div>
+                                <div class="personality-values">
+                                    <span id="val-extraversion">50%</span>
+                                    <span id="val-introversion">50%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 自発 vs 外的要因 -->
+                            <div class="personality-bar-container">
+                                <div class="personality-labels">
+                                    <span>自発型 (内発的動機)</span>
+                                    <span>外的要因型 (外発的動機)</span>
+                                </div>
+                                <div class="personality-bar-track">
+                                    <div id="bar-intrinsic" class="personality-bar-fill-left" style="width: 50%;"></div>
+                                    <div id="bar-extrinsic" class="personality-bar-fill-right" style="width: 50%;"></div>
+                                </div>
+                                <div class="personality-values">
+                                    <span id="val-intrinsic">50%</span>
+                                    <span id="val-extrinsic">50%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 開放 vs 堅実 -->
+                            <div class="personality-bar-container">
+                                <div class="personality-labels">
+                                    <span>挑戦・開放型</span>
+                                    <span>安定・堅実型</span>
+                                </div>
+                                <div class="personality-bar-track">
+                                    <div id="bar-openness" class="personality-bar-fill-left" style="width: 50%;"></div>
+                                    <div id="bar-stability" class="personality-bar-fill-right" style="width: 50%;"></div>
+                                </div>
+                                <div class="personality-values">
+                                    <span id="val-openness">50%</span>
+                                    <span id="val-stability">50%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 計画 vs 柔軟 -->
+                            <div class="personality-bar-container">
+                                <div class="personality-labels">
+                                    <span>計画・誠実型</span>
+                                    <span>柔軟・直感型</span>
+                                </div>
+                                <div class="personality-bar-track">
+                                    <div id="bar-conscientious" class="personality-bar-fill-left" style="width: 50%;"></div>
+                                    <div id="bar-flexibility" class="personality-bar-fill-right" style="width: 50%;"></div>
+                                </div>
+                                <div class="personality-values">
+                                    <span id="val-conscientious">50%</span>
+                                    <span id="val-flexibility">50%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="result-section">
