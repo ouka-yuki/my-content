@@ -39,10 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
         
-        // Q10 (現在のindex 8) で「いいえ」を選んでいる場合、次へボタンを非表示にして結果を見るボタンにする
-        const isQ10No = currentQuestion === 8 && document.querySelector('input[name="q10"]:checked')?.value === 'no';
-
-        if (currentQuestion === questions.length - 1 || isQ10No) {
+        if (currentQuestion === questions.length - 1) {
             nextBtn.style.display = 'none';
             submitBtn.style.display = 'inline-block';
         } else {
@@ -54,9 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
         if (progressBar && progressText) {
-            const isQ10NoCheck = document.querySelector('input[name="q10"]:checked')?.value === 'no';
-            const totalQuestions = isQ10NoCheck ? 9 : 10;
-            const currentStep = Math.min(currentQuestion + 1, totalQuestions);
+            const totalQuestions = questions.length;
+            const currentStep = currentQuestion + 1;
             const percentage = (currentStep / totalQuestions) * 100;
             progressBar.style.width = percentage + '%';
             progressText.textContent = `質問 ${currentStep} / ${totalQuestions}`;
@@ -64,13 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     form.addEventListener('change', (e) => {
-        if (e.target.name === 'q8') {
-            const checkedBoxes = document.querySelectorAll('input[name="q8"]:checked');
-            if (checkedBoxes.length > 3) {
-                e.target.checked = false;
-                alert('選択できるのは最大3つまでです。');
-            }
-        }
         updateControls('none');
     });
 
@@ -104,24 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const formData = new FormData(form);
-        const q1 = formData.get('q1');
-        const q2 = formData.get('q2');
-        const q3 = formData.get('q3');
-        const q4 = formData.get('q4');
-        const q5 = formData.get('q5');
-        const q6 = formData.get('q6');
-        const q7 = formData.get('q7');
-        const q8 = formData.getAll('q8');
-        const q10 = formData.get('q10');
-        const q11 = formData.get('q11');
-
-        // Q10が'yes'の場合はQ11の回答も必須
-        if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || q8.length === 0 || !q10 || (q10 === 'yes' && !q11)) {
-            alert('すべての質問に答えてください。');
-            return;
+        const answers = {};
+        for (let i = 1; i <= 13; i++) {
+            answers['q' + i] = formData.get('q' + i);
         }
 
-        calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q10, q11);
+        for (let i = 1; i <= 13; i++) {
+            if (!answers['q' + i]) {
+                alert('すべての質問に答えてください。');
+                return;
+            }
+        }
+
+        calculateResult(answers);
     });
 
     retryBtn.addEventListener('click', () => {
@@ -132,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.style.display = 'block';
     });
 
-    function calculateResult(q1, q2, q3, q4, q5, q6, q7, q8, q10, q11) {
+    function calculateResult(answers) {
         let scores = {
             sci_math: 0,
             engineering: 0,
@@ -147,91 +131,56 @@ document.addEventListener('DOMContentLoaded', () => {
             arts_create: 0
         };
 
-        // Q1: 学習スタイル（認知特性）
-        if (q1 === 'abstract') {
-            scores.sci_math += 3; scores.humanities += 2; scores.info_data += 2;
-        } else if (q1 === 'concrete') {
-            scores.engineering += 3; scores.medical += 2; scores.business += 1; scores.agri_bio += 2; scores.sports_health += 2;
-        }
+        const { q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13 } = answers;
 
-        // Q2: 認知特性2（システム vs 人間）
-        if (q2 === 'systematic') {
-            scores.sci_math += 2; scores.engineering += 2; scores.info_data += 3; scores.business += 1;
-        } else if (q2 === 'humanistic') {
-            scores.humanities += 2; scores.education += 2; scores.medical += 2; scores.intl_lang += 2; scores.arts_create += 1;
-        }
+        // Q1: 文化祭の出し物（仕組み vs 試作）
+        if (q1 === 'a') { scores.info_data += 2; scores.business += 2; scores.sci_math += 1; }
+        else if (q1 === 'b') { scores.engineering += 2; scores.arts_create += 2; scores.agri_bio += 1; }
 
-        // Q3: 動機のタイプ
-        if (q3 === 'intrinsic') {
-            scores.sci_math += 2; scores.humanities += 2; scores.arts_create += 3; scores.agri_bio += 1; scores.education += 1;
-        } else if (q3 === 'extrinsic') {
-            scores.business += 3; scores.medical += 2; scores.engineering += 1; scores.info_data += 1;
-        }
+        // Q2: 新しいスマホ（技術 vs 人々）
+        if (q2 === 'a') { scores.info_data += 3; scores.engineering += 2; scores.sci_math += 1; }
+        else if (q2 === 'b') { scores.humanities += 2; scores.intl_lang += 1; scores.business += 1; scores.medical += 1; }
 
-        // Q4: 開放性
-        if (q4 === 'high_open') {
-            scores.intl_lang += 3; scores.arts_create += 2; scores.info_data += 2; scores.sci_math += 1; scores.humanities += 1;
-        } else if (q4 === 'low_open') {
-            scores.business += 2; scores.medical += 2; scores.engineering += 1; scores.education += 1;
-        }
+        // Q3: モチベーション（自己成長 vs 他者評価）
+        if (q3 === 'a') { scores.sci_math += 2; scores.humanities += 2; scores.arts_create += 2; }
+        else if (q3 === 'b') { scores.business += 3; scores.sports_health += 2; scores.education += 1; }
 
-        // Q5: 誠実性
-        if (q5 === 'high_consc') {
-            scores.medical += 3; scores.business += 2; scores.education += 2; scores.agri_bio += 1;
-        } else if (q5 === 'low_consc') {
-            scores.arts_create += 2; scores.info_data += 1; scores.humanities += 1; scores.intl_lang += 1;
-        }
+        // Q4: 飲食店（創作 vs 王道）
+        if (q4 === 'a') { scores.intl_lang += 2; scores.arts_create += 2; scores.info_data += 1; }
+        else if (q4 === 'b') { scores.medical += 2; scores.business += 1; scores.education += 1; }
 
-        // Q6: 外向性・共感性
-        if (q6 === 'high_extra') {
-            scores.education += 3; scores.intl_lang += 3; scores.sports_health += 3; scores.business += 1; scores.medical += 2;
-        } else if (q6 === 'introverted') {
-            scores.sci_math += 3; scores.info_data += 3; scores.humanities += 2; scores.arts_create += 2;
-        }
+        // Q5: 旅行（計画 vs ノリ）
+        if (q5 === 'a') { scores.medical += 2; scores.business += 2; scores.education += 1; }
+        else if (q5 === 'b') { scores.arts_create += 2; scores.info_data += 1; scores.intl_lang += 1; }
 
-        // RIASEC処理関数
-        function processRIASEC(val) {
-            if (val === 'R') { scores.engineering += 2; scores.agri_bio += 2; scores.sports_health += 2; }
-            else if (val === 'I') { scores.sci_math += 3; scores.info_data += 2; scores.medical += 1; }
-            else if (val === 'A') { scores.arts_create += 3; scores.humanities += 2; scores.intl_lang += 1; }
-            else if (val === 'S') { scores.education += 3; scores.medical += 2; scores.sports_health += 1; }
-            else if (val === 'E') { scores.business += 3; scores.intl_lang += 1; }
-            else if (val === 'C') { scores.business += 2; scores.info_data += 1; scores.engineering += 1; }
-        }
+        // Q6: 充電（ワイワイ vs 静か）
+        if (q6 === 'a') { scores.education += 2; scores.intl_lang += 2; scores.sports_health += 2; scores.business += 1; }
+        else if (q6 === 'b') { scores.sci_math += 2; scores.humanities += 2; scores.info_data += 1; scores.arts_create += 1; }
 
-        // Q7: RIASEC (残す)
-        processRIASEC(q7);
+        // Q7: 向き合う対象（物・情報 vs 人間）
+        if (q7 === 'a') { scores.engineering += 2; scores.info_data += 2; scores.sci_math += 1; scores.arts_create += 1; }
+        else if (q7 === 'b') { scores.medical += 2; scores.education += 2; scores.business += 1; scores.intl_lang += 1; }
 
-        // Q8: テーマ複数選択 (最大3つ)
-        q8.forEach(val => {
-            if (val === 'sci1') { scores.sci_math += 3; }
-            else if (val === 'sci2') { scores.sci_math += 2; scores.info_data += 2; }
-            else if (val === 'sci3') { scores.info_data += 3; scores.engineering += 1; }
-            else if (val === 'sci4') { scores.engineering += 3; }
-            else if (val === 'sci5') { scores.engineering += 2; scores.agri_bio += 1; scores.sci_math += 1; }
-            else if (val === 'sci6') { scores.agri_bio += 3; scores.medical += 1; }
-            else if (val === 'sci7') { scores.agri_bio += 2; scores.sci_math += 1; }
-            else if (val === 'sci8') { scores.medical += 3; scores.sports_health += 1; }
-            else if (val === 'hum1') { scores.education += 2; scores.humanities += 1; scores.medical += 1; }
-            else if (val === 'hum2') { scores.humanities += 3; }
-            else if (val === 'hum3') { scores.humanities += 1; scores.intl_lang += 3; }
-            else if (val === 'hum4') { scores.arts_create += 3; }
-            else if (val === 'hum5') { scores.business += 3; }
-            else if (val === 'hum6') { scores.business += 2; scores.intl_lang += 1; }
-            else if (val === 'hum7') { scores.education += 3; }
-            else if (val === 'hum8') { scores.sports_health += 3; }
-        });
+        // Q8: 仕事の進め方（探求 vs 堅実）
+        if (q8 === 'a') { scores.sci_math += 2; scores.arts_create += 2; scores.humanities += 1; scores.agri_bio += 1; }
+        else if (q8 === 'b') { scores.business += 2; scores.medical += 2; scores.info_data += 1; }
 
-        // Q10 & Q11: 現実的制約
-        if (q10 === 'yes' && q11) {
-            if (q11 === 'high_invest') {
-                scores.medical += 4; scores.sci_math += 3; scores.agri_bio += 2;
-            } else if (q11 === 'practical') {
-                scores.info_data += 3; scores.engineering += 3; scores.business += 2; scores.sports_health += 2;
-            } else if (q11 === 'economic') {
-                scores.humanities += 2; scores.education += 2; scores.intl_lang += 2; scores.arts_create += 2;
-            }
-        }
+        // Q9: テクノロジーへの関心
+        if (q9 === 'a') { scores.info_data += 3; scores.engineering += 3; }
+        else if (q9 === 'b') { scores.arts_create += 1; scores.business += 1; }
+
+        // Q10: 自然・生命への関心
+        if (q10 === 'a') { scores.sci_math += 3; scores.agri_bio += 2; scores.medical += 2; }
+        else if (q10 === 'b') { scores.arts_create += 1; }
+
+        // Q11: 社会・ビジネスへの関心
+        if (q11 === 'a') { scores.business += 3; }
+
+        // Q12: 人間・文化への関心
+        if (q12 === 'a') { scores.humanities += 3; scores.education += 2; scores.intl_lang += 2; scores.arts_create += 1; }
+        else if (q12 === 'b') { scores.arts_create += 1; }
+
+        // Q13はアドバイス分岐用なので加算なし
 
         // Sort and get TOP 3
         let sortedCategories = Object.entries(scores)
@@ -239,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(entry => entry[0]);
 
         let top3 = sortedCategories.slice(0, 3);
-        displayResult(top3, { q1, q2, q3, q4, q5, q6, q7, q10, q11 });
+        displayResult(top3, answers);
     }
 
     function displayResult(top3Categories, traits) {
@@ -248,45 +197,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const rankingContainer = document.getElementById('ranking-container');
 
         // 性格・行動原理のスコア計算
-        const q1 = traits.q1;
-        const q3 = traits.q3;
-        const q4 = traits.q4;
-        const q5 = traits.q5;
-        const q6 = traits.q6;
-        const q7 = traits.q7;
-        const q10 = traits.q10;
+        const { q1, q3, q4, q5, q6, q7 } = traits;
 
         // 1. 外向 vs 内向
         let extra = 50;
-        if (q6 === 'high_extra') extra += 25; else extra -= 25;
-        if (q7 === 'S' || q7 === 'E') extra += 15;
-        if (q7 === 'I') extra -= 15;
-        if (q3 === 'extrinsic') extra += 10; else extra -= 10;
+        if (q6 === 'a') extra += 25; else extra -= 25;
+        if (q7 === 'b') extra += 15; else extra -= 15;
+        if (q3 === 'b') extra += 10; else extra -= 10;
         extra = Math.max(5, Math.min(95, extra));
         const intro = 100 - extra;
 
         // 2. 自発 vs 外的要因
         let intrinsic = 50;
-        if (q3 === 'intrinsic') intrinsic += 25; else intrinsic -= 25;
-        if (q1 === 'abstract') intrinsic += 10;
-        if (q4 === 'high_open') intrinsic += 10;
-        if (q10 === 'no') intrinsic += 15;
+        if (q3 === 'a') intrinsic += 25; else intrinsic -= 25;
+        if (q1 === 'a') intrinsic += 10;
+        if (q4 === 'a') intrinsic += 10;
         intrinsic = Math.max(5, Math.min(95, intrinsic));
         const extrinsic = 100 - intrinsic;
 
         // 3. 開放 vs 堅実
         let openVal = 50;
-        if (q4 === 'high_open') openVal += 30; else openVal -= 30;
-        if (q7 === 'A') openVal += 15;
-        if (q5 === 'low_consc') openVal += 10;
+        if (q4 === 'a') openVal += 30; else openVal -= 30;
+        if (q1 === 'b') openVal += 10;
+        if (q5 === 'b') openVal += 10;
         openVal = Math.max(5, Math.min(95, openVal));
         const stable = 100 - openVal;
 
         // 4. 計画 vs 柔軟
         let consc = 50;
-        if (q5 === 'high_consc') consc += 30; else consc -= 30;
-        if (q1 === 'abstract') consc += 10;
-        if (q7 === 'C') consc += 15;
+        if (q5 === 'a') consc += 30; else consc -= 30;
+        if (q1 === 'a') consc += 10;
+        if (q4 === 'b') consc += 15;
         consc = Math.max(5, Math.min(95, consc));
         const flex = 100 - consc;
 
@@ -442,36 +383,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (workStyleEl && traits) {
             let wsText = "<strong>【あなたの行動原理】</strong><br>";
             
-            if (traits.q3 === 'intrinsic') {
+            if (traits.q3 === 'a') {
                 wsText += "あなたは「自分自身の納得感や内なる好奇心」を原動力（内発的動機）として行動するタイプです。";
             } else {
                 wsText += "あなたは「他者からの評価や社会への影響力」をモチベーション（外発的動機）として頑張れるタイプです。";
             }
 
-            if (traits.q6 === 'high_extra') {
+            if (traits.q6 === 'a') {
                 wsText += "また、人と関わりながらワイワイと進めることでエネルギーを得るため、";
             } else {
                 wsText += "また、一人の時間を大切にし、深く思考することでエネルギーを得るため、";
             }
 
-            if (traits.q4 === 'high_open') {
+            if (traits.q4 === 'a') {
                 wsText += "変化の多い環境や新しいことへの挑戦を好みます。<br><br>";
             } else {
                 wsText += "決まったルーティンや安定した環境の中で着実に物事を進めるのを好みます。<br><br>";
             }
 
             wsText += "<strong>【向いている仕事・環境】</strong><br>";
-            if (traits.q6 === 'introverted' && traits.q3 === 'intrinsic') {
+            if (traits.q6 === 'b' && traits.q3 === 'a') {
                 wsText += "一人で黙々と深く探求できる「研究職」や「専門職（エンジニア・クリエイターなど）」が非常に向いています。自分のペースで納得いくまでクオリティを高められる環境で最大のパフォーマンスを発揮します。";
-            } else if (traits.q6 === 'high_extra' && traits.q3 === 'extrinsic') {
+            } else if (traits.q6 === 'a' && traits.q3 === 'b') {
                 wsText += "チームを引っ張ったり、多くの人と関わりながら成果を上げる「企画職」「営業職」「マネジメント職」などに適性があります。他者からの感謝や目に見える評価がダイレクトに返ってくる環境で輝きます。";
-            } else if (traits.q6 === 'high_extra' && traits.q3 === 'intrinsic') {
+            } else if (traits.q6 === 'a' && traits.q3 === 'a') {
                 wsText += "人と関わることは好きですが、評価よりも「相手の役に立ったか」「良いものを作れたか」を重視します。「教育関連」「医療・福祉」「対人サポート職」など、他者の成長やケアに直接関わる仕事に向いています。";
-            } else if (traits.q6 === 'introverted' && traits.q3 === 'extrinsic') {
+            } else if (traits.q6 === 'b' && traits.q3 === 'b') {
                 wsText += "一人で集中して作業しつつも、その結果が社会にどう影響を与えるかを重視します。「データアナリスト」「財務・会計」「Webマーケティング」など、専門スキルを用いて組織や社会に確かな貢献をする仕事が合っています。";
             }
 
-            if (traits.q5 === 'high_consc') {
+            if (traits.q5 === 'a') {
                 wsText += " 計画的にコツコツと努力できるため、長期的なプロジェクトや正確性が求められる業務でも高く信頼されます。";
             } else {
                 wsText += " 柔軟性が高く、型にはまらない発想ができるため、ゼロからイチを生み出すような業務で力を発揮します。";
@@ -494,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
 
-            rankBlock.innerHTML = `
+            let html = `
                 <div class="ranking-rank">第${index + 1}位</div>
                 <h4 class="ranking-title">${data.title}</h4>
                 <div class="ranking-section">
@@ -505,6 +446,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h6>💼 就く人が多い職業</h6>
                     <p>${data.jobs}</p>
                 </div>
+            `;
+
+            // q13 === 'b' の場合、「現実的な進路アプローチ」を追加
+            if (traits.q13 === 'b') {
+                let adviceText = '';
+                if (cat === 'sci_math') adviceText = '国公立大学への進学による学費抑制や、データサイエンス等、就職に直結するスキルの習得を並行して行うルートがおすすめです。';
+                else if (cat === 'engineering') adviceText = '工学部は就職率が非常に高く、大学推薦枠も豊富です。企業との共同研究が盛んな大学を選ぶと、就職活動がさらに有利になります。';
+                else if (cat === 'info_data') adviceText = 'IT業界はスキル重視のため、大学名以上にポートフォリオ（作品）が評価されます。奨学金制度を利用しつつ、在学中からインターンで実務経験を積むのが得策です。';
+                else if (cat === 'agri_bio') adviceText = 'バイオ系は大学院進学率が高く費用がかかる傾向があります。地方の国公立大学は農学系に強く、生活費も抑えられるため現実的な選択肢となります。';
+                else if (cat === 'medical') adviceText = '医学部は非常に高額ですが、自治体の「地域枠」や病院の給付型奨学金を利用するルートがあります。または4年制の医療技術職（放射線技師など）も安定かつ早期就労が可能です。';
+                else if (cat === 'sports_health') adviceText = 'スポーツトレーナー等の資格取得には専門学校というルートもありますが、大学で教員免許や健康運動指導士などを取得することで、就職の安定性が高まります。';
+                else if (cat === 'education') adviceText = '教員養成系は国公立大学の定員が多く、学費を抑えやすい分野です。また、自治体の奨学金返還免除制度なども活用しやすい傾向にあります。';
+                else if (cat === 'business') adviceText = '経済・経営系は文系の中で最も就職の選択肢が広く、潰しが効く分野です。資格取得支援が手厚い大学を選ぶと、公認会計士などの強力な武器を手に入れられます。';
+                else if (cat === 'humanities') adviceText = '人文学は専門が就職に直結しにくい側面があるため、教員免許の取得や、ITスキル・語学を並行して学ぶなど、「＋α」の実学スキルを持つことで就活の不安を払拭できます。';
+                else if (cat === 'intl_lang') adviceText = '留学費用がネックになる場合は、国内で留学生と交流できる環境が整った大学や、大学の交換留学制度（学費免除）をフル活用するルートが現実的です。';
+                else if (cat === 'arts_create') adviceText = '芸術分野は学費が高めですが、国公立の芸術大学を目指す、または一般大学のデザイン・メディア情報系学部を選択することで、費用を抑えつつクリエイティブなスキルを磨けます。';
+
+                html += `
+                <div class="ranking-section realistic-advice" style="background-color: rgba(255, 204, 0, 0.1); padding: 1rem; border-left: 4px solid #ffcc00; margin-top: 1rem;">
+                    <h6 style="color: #ff9900;">🛤️ 現実的な進路アプローチ</h6>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">${adviceText}</p>
+                </div>
+                `;
+            }
+
+            html += `
                 <div class="ranking-section">
                     <h6>🔍 興味のタネ（面白いトピック）</h6>
                     <div class="articles-container">
@@ -512,6 +479,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+
+            rankBlock.innerHTML = html;
             rankingContainer.appendChild(rankBlock);
         });
 
