@@ -17,6 +17,7 @@
                 <li><a href="#hero">ホーム</a></li>
                 <li><a href="#diagnostic">適性診断</a></li>
                 <li><a href="#research">最先端研究</a></li>
+                <li><a href="#articles">記事一覧</a></li>
             </ul>
         </div>
     </nav>
@@ -314,11 +315,31 @@
                 </div>
             </div>
         </section>
+        <!-- 記事一覧セクション -->
+        <section id="articles" class="section">
+            <div class="container fade-in">
+                <h2 class="section-title">記事一覧</h2>
+                <p class="section-desc">全分野の研究トピックを一覧で探せます。気になる分野でフィルタリングしてみよう。</p>
+                <div class="filter-buttons" id="filter-buttons"></div>
+                <div class="articles-full-grid" id="articles-full-grid"></div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer glass">
         <p>&copy; 2026 EduCompass. All rights reserved.</p>
     </footer>
+
+    <!-- 記事全文モーダル -->
+    <div id="article-modal" class="modal-overlay">
+        <div class="modal-panel glass-panel">
+            <button class="modal-close" id="modal-close" aria-label="閉じる">&times;</button>
+            <span class="badge" id="modal-badge"></span>
+            <h3 id="modal-title"></h3>
+            <p id="modal-desc"></p>
+            <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="margin-top:1.5rem; display:inline-block;">🔍 詳しく調べる</a>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
