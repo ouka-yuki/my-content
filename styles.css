@@ -871,3 +871,376 @@ body::after {
     color: var(--text-secondary);
     line-height: 1.9;
 }
+
+/* ===== 認証 UI ===== */
+.nav-auth {
+    display: flex;
+    align-items: center;
+}
+
+.nav-auth-btn {
+    padding: 0.45rem 1.1rem;
+    font-size: 0.875rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+}
+
+.user-profile-link:hover {
+    opacity: 0.8;
+}
+
+.user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.user-email-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 認証モーダル (Google OAuth) */
+.auth-modal-panel {
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-logo {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.auth-modal-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+}
+
+.auth-modal-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: #fff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.google-login-btn:hover {
+    background: #f8f8f8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.google-login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* フォームフィールド (プロフィールページ用) */
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.auth-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.auth-input {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+}
+
+.auth-input:focus {
+    border-color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.auth-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.55;
+}
+
+.auth-message {
+    font-size: 0.85rem;
+    min-height: 1.2em;
+    line-height: 1.5;
+    margin-top: 0.75rem;
+}
+
+.auth-message-error { color: #f87171; }
+.auth-message-success { color: #4ade80; }
+
+/* 記事カードの保存ボタン */
+.card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    gap: 0.5rem;
+}
+
+.save-article-btn {
+    padding: 0.35rem 0.9rem;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    border-radius: 100px;
+    color: var(--accent-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.save-article-btn:hover:not(:disabled):not(.saved) {
+    background: rgba(139, 92, 246, 0.25);
+}
+
+.save-article-btn.saved {
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.35);
+    color: #4ade80;
+    cursor: default;
+}
+
+.save-article-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* トースト通知 */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(1.5rem);
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.toast.toast-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.toast-error {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #f87171;
+}
+
+/* ===== プロフィールページ ===== */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.profile-avatar-large {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-nickname-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.profile-nickname {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.btn-icon {
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    line-height: 1;
+}
+
+.btn-icon:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.profile-email-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.profile-section {
+    margin-bottom: 3rem;
+}
+
+.profile-diagnosis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.diagnosis-rank-card {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.rank-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.75rem;
+}
+
+.saved-articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.saved-article-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.saved-article-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.delete-saved-btn {
+    background: none;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: 50%;
+    width: 1.6rem;
+    height: 1.6rem;
+    color: #f87171;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.delete-saved-btn:hover {
+    background: rgba(248, 113, 113, 0.15);
+}
+
+.profile-empty-msg {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.link-accent {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.link-accent:hover {
+    text-decoration: underline;
+}

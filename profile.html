@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール | EduCompass</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <h1 class="logo"><a href="/" style="color:inherit;text-decoration:none;">EduCompass</a></h1>
+            <ul class="nav-links">
+                <li><a href="/">ホーム</a></li>
+                <li><a href="/#diagnostic">適性診断</a></li>
+                <li><a href="/#articles">記事一覧</a></li>
+                <li class="nav-auth">
+                    <div id="user-info" class="user-info hidden">
+                        <div class="user-profile-link">
+                            <span class="user-avatar" id="user-avatar"></span>
+                            <span class="user-email-text" id="user-email"></span>
+                        </div>
+                        <button id="logout-btn" class="btn btn-secondary nav-auth-btn">ログアウト</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- 未ログイン時 -->
+        <div id="auth-gate" class="hidden">
+            <div class="container" style="text-align:center;padding:6rem 1rem;">
+                <div class="glass-panel" style="max-width:400px;margin:0 auto;padding:3rem 2rem;">
+                    <p style="font-size:3rem;margin-bottom:1rem;">🔒</p>
+                    <h2 style="margin-bottom:0.75rem;">ログインが必要です</h2>
+                    <p style="margin:0 0 2rem;color:var(--text-secondary);">プロフィールページを見るにはログインしてください。</p>
+                    <a href="/" class="btn btn-primary">トップページへ戻る</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ログイン後 -->
+        <section id="profile-content" class="section hidden">
+            <div class="container">
+
+                <!-- プロフィールヘッダー -->
+                <div class="profile-header glass-panel fade-in">
+                    <div class="profile-avatar-large" id="profile-avatar-large"></div>
+                    <div class="profile-info">
+                        <div class="profile-nickname-row">
+                            <span id="profile-nickname-display" class="profile-nickname">読み込み中...</span>
+                            <button id="edit-nickname-btn" class="btn-icon" title="ニックネームを編集">✏️</button>
+                        </div>
+                        <p id="profile-email" class="profile-email-text"></p>
+                    </div>
+                </div>
+
+                <!-- ニックネーム編集 -->
+                <div id="nickname-edit-form" class="glass-panel fade-in hidden" style="margin-top:-1rem;margin-bottom:2rem;max-width:480px;padding:1.5rem;">
+                    <h4 style="margin-bottom:1rem;font-size:1rem;">ニックネームを変更</h4>
+                    <div class="auth-field">
+                        <input type="text" id="nickname-input" class="auth-input" placeholder="ニックネームを入力（30文字まで）" maxlength="30">
+                    </div>
+                    <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+                        <button id="save-nickname-btn" class="btn btn-primary" style="flex:1;">保存する</button>
+                        <button id="cancel-nickname-btn" class="btn btn-secondary" style="flex:1;">キャンセル</button>
+                    </div>
+                </div>
+
+                <!-- 診断結果 -->
+                <div class="profile-section fade-in">
+                    <h2 class="section-title" style="font-size:1.5rem;text-align:left;margin-bottom:1.5rem;">🎯 最新の診断結果</h2>
+                    <div id="diagnosis-display" class="profile-diagnosis-grid">
+                        <p id="no-diagnosis" class="profile-empty-msg">まだ診断を受けていません。<br><a href="/#diagnostic" class="link-accent">診断を受ける →</a></p>
+                    </div>
+                </div>
+
+                <!-- 保存した記事 -->
+                <div class="profile-section fade-in">
+                    <div style="display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                        <h2 class="section-title" style="font-size:1.5rem;text-align:left;margin-bottom:0;">📚 保存した記事</h2>
+                        <span style="color:var(--text-secondary);font-size:0.9rem;"><span id="saved-count">0</span> / 3件</span>
+                    </div>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">最大3件まで保存できます。記事の保存は記事一覧ページから行えます。</p>
+                    <div id="saved-articles-grid" class="saved-articles-grid">
+                        <p id="no-saved-articles" class="profile-empty-msg">保存した記事はありません。<br><a href="/#articles" class="link-accent">記事一覧を見る →</a></p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.85rem;">
+        <p>© 2025 EduCompass by AntiGravity</p>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="profile.js"></script>
+</body>
+</html>

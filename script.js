@@ -1,3 +1,9 @@
+// Supabase 初期化
+const supabaseClient = window.supabase.createClient(
+    window.APP_CONFIG.supabaseUrl,
+    window.APP_CONFIG.supabaseKey
+);
+
 document.addEventListener('DOMContentLoaded', () => {
     // スクロール時のフェードインアニメーション
     const observer = new IntersectionObserver((entries) => {
@@ -9,6 +15,153 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // ===== 認証 (Supabase Google OAuth) =====
+    let currentUser = null;
+    let savedArticleUrls = new Set();
+    let currentFilter = 'all';
+
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
+    const userEmailEl = document.getElementById('user-email');
+    const userAvatarEl = document.getElementById('user-avatar');
+    const authModal = document.getElementById('auth-modal');
+    const authModalClose = document.getElementById('auth-modal-close');
+    const authMessage = document.getElementById('auth-message');
+
+    function showToast(message, type) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = 'toast toast-' + (type || 'success') + ' toast-show';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.remove('toast-show'), 3000);
+    }
+
+    function openAuthModal() {
+        authModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        authMessage.textContent = '';
+        authMessage.className = 'auth-message';
+    }
+
+    function closeAuthModal() {
+        authModal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    async function ensureProfile(user) {
+        const { data } = await supabaseClient.from('profiles').select('id').eq('id', user.id).maybeSingle();
+        if (!data) {
+            const nickname = user.user_metadata?.name || user.user_metadata?.full_name || '';
+            await supabaseClient.from('profiles').insert({ id: user.id, nickname });
+        }
+    }
+
+    async function fetchSavedArticles() {
+        if (!currentUser) return;
+        const { data } = await supabaseClient
+            .from('saved_articles')
+            .select('article_url')
+            .eq('user_id', currentUser.id);
+        savedArticleUrls = new Set((data || []).map(r => r.article_url));
+        renderArticleList(currentFilter);
+    }
+
+    async function saveDiagnosisResult(top3) {
+        if (!currentUser) return;
+        const { error } = await supabaseClient.from('diagnosis_results').insert({
+            user_id: currentUser.id,
+            top1: top3[0] || null,
+            top2: top3[1] || null,
+            top3: top3[2] || null
+        });
+        if (!error) showToast('診断結果を保存しました！');
+    }
+
+    async function handleSaveArticle(btn, catKey, catLabel, article) {
+        if (!currentUser) {
+            openAuthModal();
+            return;
+        }
+        if (btn.classList.contains('saved')) return;
+        if (savedArticleUrls.size >= 3) {
+            showToast('保存できる記事は1アカウントにつき3件までです。', 'error');
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = '保存中...';
+        const { error } = await supabaseClient.from('saved_articles').insert({
+            user_id: currentUser.id,
+            category: catKey,
+            article_title: article.title,
+            article_url: article.url,
+            article_desc: article.desc || article.summary
+        });
+        btn.disabled = false;
+        if (error) {
+            btn.textContent = '＋ 保存する';
+            showToast('保存に失敗しました。', 'error');
+        } else {
+            savedArticleUrls.add(article.url);
+            btn.textContent = '✓ 保存済み';
+            btn.classList.add('saved');
+            showToast('記事を保存しました！プロフィールで確認できます。');
+        }
+    }
+
+    function updateAuthUI(session) {
+        currentUser = session ? session.user : null;
+        if (session) {
+            loginBtn.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+            const email = session.user.email || '';
+            if (userEmailEl) userEmailEl.textContent = email;
+            if (userAvatarEl) userAvatarEl.textContent = email.charAt(0).toUpperCase();
+            fetchSavedArticles();
+            ensureProfile(session.user);
+        } else {
+            loginBtn.classList.remove('hidden');
+            userInfo.classList.add('hidden');
+            savedArticleUrls.clear();
+            renderArticleList(currentFilter);
+        }
+    }
+
+    loginBtn.addEventListener('click', openAuthModal);
+    authModalClose.addEventListener('click', closeAuthModal);
+    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+        const googleBtn = document.getElementById('google-login-btn');
+        googleBtn.disabled = true;
+        googleBtn.textContent = '接続中...';
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + window.location.pathname }
+        });
+        if (error) {
+            googleBtn.disabled = false;
+            googleBtn.textContent = 'Googleでログインする';
+            authMessage.textContent = 'ログインに失敗しました。しばらく後でお試しください。';
+            authMessage.className = 'auth-message auth-message-error';
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        showToast('ログアウトしました。');
+    });
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateAuthUI(session);
+    });
+
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        updateAuthUI(session);
+    });
+    // ===== 認証ここまで =====
 
     // 診断ロジック
     const questions = document.querySelectorAll('.question-block');
@@ -629,8 +782,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             loader.classList.add('hidden');
             resultArea.classList.remove('hidden');
-            // 結果エリアへスクロール
             resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            saveDiagnosisResult(top3Categories);
         }, 1800);
     }
 
@@ -712,7 +865,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === e.currentTarget) closeArticleModal();
     });
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeArticleModal();
+        if (e.key === 'Escape') {
+            closeArticleModal();
+            closeAuthModal();
+        }
     });
 
     function renderArticleList(filter) {
@@ -722,15 +878,28 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(articleIndex).forEach(([key, cat]) => {
             if (filter !== 'all' && filter !== key) return;
             cat.articles.forEach(article => {
+                const isSaved = savedArticleUrls.has(article.url);
                 const card = document.createElement('div');
                 card.className = 'article-list-card glass-panel';
                 card.innerHTML = `
                     <span class="badge">${cat.label}</span>
                     <h4>${article.title}</h4>
                     <p class="article-summary">${article.summary}</p>
-                    <span class="article-read-more">続きを読む →</span>
+                    <div class="card-actions">
+                        <span class="article-read-more">続きを読む →</span>
+                        <button class="save-article-btn${isSaved ? ' saved' : ''}">${isSaved ? '✓ 保存済み' : '＋ 保存する'}</button>
+                    </div>
                 `;
-                card.addEventListener('click', () => openArticleModal(cat.label, article));
+                const saveBtn = card.querySelector('.save-article-btn');
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('save-article-btn')) {
+                        openArticleModal(cat.label, article);
+                    }
+                });
+                saveBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleSaveArticle(saveBtn, key, cat.label, article);
+                });
                 grid.appendChild(card);
             });
         });
@@ -756,7 +925,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!e.target.classList.contains('filter-btn')) return;
             filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            renderArticleList(e.target.dataset.filter);
+            currentFilter = e.target.dataset.filter;
+            renderArticleList(currentFilter);
         });
 
         renderArticleList('all');
