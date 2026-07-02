@@ -1,3 +1,9 @@
+if (!window.APP_CONFIG) {
+    document.getElementById('auth-gate').classList.remove('hidden');
+    document.getElementById('auth-gate').innerHTML = '<div class="container" style="text-align:center;padding:6rem 1rem;"><div class="glass-panel" style="max-width:400px;margin:0 auto;padding:3rem 2rem;"><h2>設定エラー</h2><p style="margin:1rem 0 2rem;color:var(--text-secondary);">config.js の読み込みに失敗しました。</p><a href="/" class="btn btn-primary">トップへ戻る</a></div></div>';
+    throw new Error('APP_CONFIG not found');
+}
+
 const supabaseClient = window.supabase.createClient(
     window.APP_CONFIG.supabaseUrl,
     window.APP_CONFIG.supabaseKey
