@@ -77,7 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
             top2: top3[1] || null,
             top3: top3[2] || null
         });
-        if (!error) showToast('診断結果を保存しました！');
+        if (!error) {
+            showToast('診断結果を保存しました！');
+        } else {
+            showToast('診断結果の保存に失敗しました: ' + error.message, 'error');
+        }
     }
 
     async function handleSaveArticle(btn, catKey, catLabel, article) {
@@ -174,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     logoutBtn.addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
+        updateAuthUI(null);
         showToast('ログアウトしました。');
     });
 
@@ -739,13 +744,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const rankBlock = document.createElement('div');
             rankBlock.className = 'ranking-block fade-in visible';
 
-            const articlesHtml = data.articles.map(article => `
+            const articlesHtml = data.articles.map((article, aIdx) => {
+                const isSaved = savedArticleUrls.has(article.url);
+                return `
                 <div class="article-card">
                     <h6>${article.title}</h6>
                     <p>${article.desc}</p>
-                    ${article.url ? `<p class="article-link" style="font-size:0.85rem; margin-top:0.8rem; text-align:right;"><a href="${article.url}" target="_blank" style="color:var(--primary-color); text-decoration:underline; font-weight:600;">🔍 J-Stageや大学HPで調べる</a></p>` : ''}
-                </div>
-            `).join('');
+                    <div class="card-actions" style="margin-top:0.8rem;">
+                        ${article.url ? `<a href="${article.url}" target="_blank" style="color:var(--primary-color);text-decoration:underline;font-weight:600;font-size:0.85rem;">🔍 J-Stageや大学HPで調べる</a>` : '<span></span>'}
+                        <button class="save-article-btn result-save-btn${isSaved ? ' saved' : ''}" data-cat="${cat}" data-idx="${aIdx}">${isSaved ? '✓ 保存済み' : '＋ 保存する'}</button>
+                    </div>
+                </div>`;
+            }).join('');
 
             let html = `
                 <div class="ranking-rank">第${index + 1}位</div>
@@ -793,6 +803,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             rankBlock.innerHTML = html;
+            rankBlock.querySelectorAll('.result-save-btn').forEach(btn => {
+                const catKey = btn.dataset.cat;
+                const aIdx = parseInt(btn.dataset.idx);
+                const article = resultsData[catKey].articles[aIdx];
+                btn.addEventListener('click', () => handleSaveArticle(btn, catKey, resultsData[catKey].title, article));
+            });
             rankingContainer.appendChild(rankBlock);
         });
 

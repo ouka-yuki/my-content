@@ -54,14 +54,16 @@ async function loadProfile(user) {
     }
 
     // 診断結果取得
-    const { data: diagResults } = await supabaseClient
+    const { data: diagResults, error: diagErr } = await supabaseClient
         .from('diagnosis_results')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
 
-    if (diagResults && diagResults.length > 0) {
+    if (diagErr) {
+        document.getElementById('no-diagnosis').textContent = 'データの取得に失敗しました: ' + diagErr.message;
+    } else if (diagResults && diagResults.length > 0) {
         const result = diagResults[0];
         document.getElementById('no-diagnosis').style.display = 'none';
         const grid = document.getElementById('diagnosis-display');
@@ -79,7 +81,7 @@ async function loadProfile(user) {
     }
 
     // 保存記事取得
-    const { data: articles } = await supabaseClient
+    const { data: articles, error: articlesErr } = await supabaseClient
         .from('saved_articles')
         .select('*')
         .eq('user_id', user.id)
@@ -88,7 +90,9 @@ async function loadProfile(user) {
     const savedCount = (articles || []).length;
     document.getElementById('saved-count').textContent = savedCount;
 
-    if (articles && articles.length > 0) {
+    if (articlesErr) {
+        document.getElementById('no-saved-articles').textContent = 'データの取得に失敗しました: ' + articlesErr.message;
+    } else if (articles && articles.length > 0) {
         document.getElementById('no-saved-articles').style.display = 'none';
         const grid = document.getElementById('saved-articles-grid');
         articles.forEach(article => {
