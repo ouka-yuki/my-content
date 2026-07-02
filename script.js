@@ -85,7 +85,30 @@ document.addEventListener('DOMContentLoaded', () => {
             openAuthModal();
             return;
         }
-        if (btn.classList.contains('saved')) return;
+
+        // 保存済み → 解除
+        if (btn.classList.contains('saved')) {
+            btn.disabled = true;
+            btn.textContent = '解除中...';
+            const { error } = await supabaseClient
+                .from('saved_articles')
+                .delete()
+                .eq('user_id', currentUser.id)
+                .eq('article_url', article.url);
+            btn.disabled = false;
+            if (error) {
+                btn.textContent = '✓ 保存済み';
+                showToast('解除に失敗しました。', 'error');
+            } else {
+                savedArticleUrls.delete(article.url);
+                btn.textContent = '＋ 保存する';
+                btn.classList.remove('saved');
+                showToast('保存を解除しました。');
+            }
+            return;
+        }
+
+        // 未保存 → 保存
         if (savedArticleUrls.size >= 3) {
             showToast('保存できる記事は1アカウントにつき3件までです。', 'error');
             return;
