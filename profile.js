@@ -1,7 +1,16 @@
 if (!window.APP_CONFIG) {
-    document.getElementById('auth-gate').classList.remove('hidden');
-    document.getElementById('auth-gate').innerHTML = '<div class="container" style="text-align:center;padding:6rem 1rem;"><div class="glass-panel" style="max-width:400px;margin:0 auto;padding:3rem 2rem;"><h2>設定エラー</h2><p style="margin:1rem 0 2rem;color:var(--text-secondary);">config.js の読み込みに失敗しました。</p><a href="/" class="btn btn-primary">トップへ戻る</a></div></div>';
+    document.getElementById('auth-gate-icon').textContent = '⚠️';
+    document.getElementById('auth-gate-title').textContent = '設定エラー';
+    document.getElementById('auth-gate-msg').textContent = 'config.js の読み込みに失敗しました。';
+    document.getElementById('auth-gate-actions').innerHTML = '<a href="/" class="btn btn-primary">トップへ戻る</a>';
     throw new Error('APP_CONFIG not found');
+}
+
+if (!window.supabase) {
+    document.getElementById('auth-gate-icon').textContent = '⚠️';
+    document.getElementById('auth-gate-title').textContent = 'ライブラリ読み込みエラー';
+    document.getElementById('auth-gate-msg').textContent = 'Supabase の読み込みに失敗しました。ページをリロードしてください。';
+    throw new Error('window.supabase not found');
 }
 
 const supabaseClient = window.supabase.createClient(
@@ -31,6 +40,16 @@ function showToast(message, type) {
     toast._timer = setTimeout(() => toast.classList.remove('toast-show'), 3000);
 }
 
+function showAuthGateNotLoggedIn() {
+    document.getElementById('auth-gate-icon').textContent = '🔒';
+    document.getElementById('auth-gate-title').textContent = 'ログインが必要です';
+    document.getElementById('auth-gate-msg').textContent = 'プロフィールページを見るにはログインしてください。';
+    document.getElementById('auth-gate-actions').innerHTML = '<a href="/" class="btn btn-primary">トップページへ戻る</a>';
+    document.getElementById('auth-gate').classList.remove('hidden');
+    document.getElementById('profile-content').classList.add('hidden');
+    document.getElementById('user-info').classList.add('hidden');
+}
+
 async function loadProfile(user) {
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('profile-content').classList.remove('hidden');
@@ -42,8 +61,12 @@ async function loadProfile(user) {
     document.getElementById('profile-email').textContent = email;
 
     // プロフィール取得 / 作成
-    const { data: profile } = await supabaseClient
+    const { data: profile, error: profileErr } = await supabaseClient
         .from('profiles').select('*').eq('id', user.id).maybeSingle();
+
+    if (profileErr) {
+        console.error('profiles fetch error:', profileErr);
+    }
 
     if (profile) {
         const nick = profile.nickname || '未設定';
@@ -114,7 +137,7 @@ async function loadProfile(user) {
                 ${article.article_url
                     ? `<a href="${article.article_url}" target="_blank" rel="noopener noreferrer"
                           class="btn btn-primary" style="display:inline-block;margin-top:1rem;font-size:0.85rem;padding:0.5rem 1rem;">
-                          🔍 詳しく調べる
+                          詳しく調べる
                        </a>`
                     : ''}
             `;
@@ -170,16 +193,15 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // 認証状態の監視
 supabaseClient.auth.onAuthStateChange((_event, session) => {
     if (!session) {
-        document.getElementById('auth-gate').classList.remove('hidden');
-        document.getElementById('profile-content').classList.add('hidden');
-        document.getElementById('user-info').classList.add('hidden');
+        showAuthGateNotLoggedIn();
     }
 });
 
+// 初回セッション確認
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
     if (session) {
         loadProfile(session.user);
     } else {
-        document.getElementById('auth-gate').classList.remove('hidden');
+        showAuthGateNotLoggedIn();
     }
 });

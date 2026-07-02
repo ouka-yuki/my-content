@@ -8,26 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script>
-        window.onerror = function(msg, src, line) {
-            var d = document.createElement('div');
-            d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#f97316;color:#fff;padding:1rem;z-index:9999;font-family:monospace;font-size:0.85rem;';
-            d.textContent = 'JSエラー: ' + msg + ' — ' + src + ':' + line;
-            document.body.appendChild(d);
-        };
-        var d = document.createElement('div');
-        d.style.cssText = 'position:fixed;top:60px;left:0;right:0;padding:0.75rem;z-index:9999;text-align:center;font-weight:bold;';
-        if (window.APP_CONFIG) {
-            d.style.background = '#22c55e';
-            d.style.color = '#fff';
-            d.textContent = 'config.js OK';
-        } else {
-            d.style.background = '#ef4444';
-            d.style.color = '#fff';
-            d.textContent = 'config.js が読み込まれていません';
-        }
-        document.body.appendChild(d);
-    </script>
 </head>
 <body>
     <nav class="navbar glass">
@@ -51,14 +31,14 @@
     </nav>
 
     <main>
-        <!-- 未ログイン時 -->
-        <div id="auth-gate" class="hidden">
+        <!-- 未ログイン時 / ロード中 -->
+        <div id="auth-gate">
             <div class="container" style="text-align:center;padding:6rem 1rem;">
                 <div class="glass-panel" style="max-width:400px;margin:0 auto;padding:3rem 2rem;">
-                    <p style="font-size:3rem;margin-bottom:1rem;">🔒</p>
-                    <h2 style="margin-bottom:0.75rem;">ログインが必要です</h2>
-                    <p style="margin:0 0 2rem;color:var(--text-secondary);">プロフィールページを見るにはログインしてください。</p>
-                    <a href="/" class="btn btn-primary">トップページへ戻る</a>
+                    <p style="font-size:3rem;margin-bottom:1rem;" id="auth-gate-icon">⏳</p>
+                    <h2 id="auth-gate-title" style="margin-bottom:0.75rem;">読み込み中...</h2>
+                    <p id="auth-gate-msg" style="margin:0 0 2rem;color:var(--text-secondary);">しばらくお待ちください。</p>
+                    <div id="auth-gate-actions"></div>
                 </div>
             </div>
         </div>
