@@ -53,6 +53,7 @@ function showAuthGateNotLoggedIn() {
 async function loadProfile(user) {
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('profile-content').classList.remove('hidden');
+    document.querySelectorAll('#profile-content .fade-in').forEach(el => el.classList.add('visible'));
 
     const email = user.email || '';
     document.getElementById('user-info').classList.remove('hidden');
